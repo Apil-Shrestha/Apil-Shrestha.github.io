@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SkyLens — Weather App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#030812;--bg2:#060d1c;--surf:#0a1228;--surf2:#0f1a35;
+  --border:#142040;--accent:#38bdf8;--accent-rgb:56,189,248;
+  --accent2:#818cf8;--text:#e8f4ff;--text2:#6688aa;--muted:#2a3a5a;
+  --f-d:'Syne',sans-serif;--f-b:'DM Sans',sans-serif;
+  --r:16px;--tr:.3s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--f-b);font-weight:300;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:24px 16px 48px;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% 0%,rgba(56,189,248,.06) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 80%,rgba(129,140,248,.04) 0%,transparent 50%);
+}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+/* ── HEADER ── */
+.app-header{
+  width:100%;max-width:900px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:32px;
+}
+.app-logo{font-family:var(--f-d);font-size:1.3rem;font-weight:800;letter-spacing:-.04em}
+.app-logo span{color:var(--accent)}
+.last-updated{font-size:.78rem;color:var(--text2)}
+
+/* ── SEARCH ── */
+.search-bar{
+  display:flex;gap:10px;width:100%;max-width:900px;margin-bottom:28px;
+}
+.search-input{
+  flex:1;background:var(--surf);border:1.5px solid var(--border);border-radius:100px;
+  padding:14px 22px;color:var(--text);font-size:.95rem;outline:none;
+  transition:border-color var(--tr),box-shadow var(--tr);
+}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.12)}
+.search-input::placeholder{color:var(--text2)}
+.search-btn{
+  background:var(--accent);color:var(--bg);font-family:var(--f-d);
+  font-size:.88rem;font-weight:700;padding:14px 26px;border-radius:100px;
+  display:flex;align-items:center;gap:8px;
+  transition:opacity var(--tr),transform .2s;white-space:nowrap;
+}
+.search-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+/* Quick city buttons */
+.quick-cities{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;
+  width:100%;max-width:900px;
+}
+.city-pill{
+  background:var(--surf);border:1px solid var(--border);border-radius:100px;
+  padding:7px 16px;font-size:.8rem;color:var(--text2);
+  transition:background var(--tr),border-color var(--tr),color var(--tr);
+}
+.city-pill:hover,.city-pill.active{background:rgba(var(--accent-rgb),.1);border-color:rgba(var(--accent-rgb),.35);color:var(--accent)}
+
+/* ── MAIN CARD ── */
+.main-card{
+  width:100%;max-width:900px;
+  background:var(--surf);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;margin-bottom:20px;
+}
+
+.main-top{
+  display:grid;grid-template-columns:1fr auto;gap:24px;
+  padding:32px;position:relative;overflow:hidden;
+}
+.main-top::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.05) 0%,transparent 60%);
+}
+.city-name{font-family:var(--f-d);font-size:clamp(1.6rem,4vw,2.5rem);font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.country-row{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:.9rem;margin-bottom:24px}
+.temp-big{font-family:var(--f-d);font-size:clamp(4rem,12vw,7rem);font-weight:800;line-height:1;letter-spacing:-.04em}
+.temp-big .unit{font-size:clamp(1.5rem,4vw,2.5rem);font-weight:400;color:var(--text2);vertical-align:super}
+.condition{font-size:1.1rem;color:var(--text2);margin-top:8px}
+.feels{font-size:.85rem;color:var(--text2);margin-top:6px}
+
+.weather-icon-big{
+  font-size:clamp(4rem,12vw,8rem);
+  filter:drop-shadow(0 0 30px rgba(var(--accent-rgb),.25));
+  animation:floatIcon 4s ease-in-out infinite;
+  z-index:1;
+}
+@keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* Stats strip */
+.stats-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--border);
+}
+.stat-block{
+  padding:20px;text-align:center;border-right:1px solid var(--border);
+  transition:background var(--tr);
+}
+.stat-block:last-child{border-right:none}
+.stat-block:hover{background:var(--surf2)}
+.sb-icon{font-size:1.4rem;margin-bottom:8px}
+.sb-val{font-family:var(--f-d);font-size:1.1rem;font-weight:700}
+.sb-lbl{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+
+/* ── HOURLY FORECAST ── */
+.forecast-section{
+  width:100%;max-width:900px;
+  background:var(--surf);border:1px solid var(--border);border-radius:20px;
+  padding:24px;margin-bottom:20px;
+}
+.sec-title{font-family:var(--f-d);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text2);margin-bottom:18px}
+.hourly-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.hourly-scroll::-webkit-scrollbar{height:3px}
+.hour-item{
+  min-width:76px;background:var(--surf2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 10px;text-align:center;flex-shrink:0;
+  transition:border-color var(--tr),background var(--tr);
+}
+.hour-item:hover{border-color:rgba(var(--accent-rgb),.35);background:rgba(var(--accent-rgb),.05)}
+.hour-item.now{border-color:var(--accent);background:rgba(var(--accent-rgb),.08)}
+.h-time{font-size:.72rem;color:var(--text2);margin-bottom:8px}
+.h-icon{font-size:1.5rem;margin-bottom:8px}
+.h-temp{font-family:var(--f-d);font-size:.9rem;font-weight:700}
+.h-rain{font-size:.68rem;color:var(--accent2);margin-top:4px}
+
+/* ── 7-DAY FORECAST ── */
+.week-list{display:flex;flex-direction:column;gap:8px}
+.day-row{
+  display:flex;align-items:center;background:var(--surf2);border:1px solid var(--border);
+  border-radius:12px;padding:14px 18px;gap:16px;
+  transition:border-color var(--tr),background var(--tr);
+}
+.day-row:hover{border-color:rgba(var(--accent-rgb),.25)}
+.day-row.today-row{border-color:rgba(var(--accent-rgb),.3);background:rgba(var(--accent-rgb),.05)}
+.dr-day{font-family:var(--f-d);font-size:.85rem;font-weight:600;min-width:50px}
+.dr-icon{font-size:1.5rem}
+.dr-cond{font-size:.82rem;color:var(--text2);flex:1}
+.dr-bar{flex:1;height:4px;background:var(--muted);border-radius:4px;overflow:hidden}
+.dr-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+.dr-temps{display:flex;gap:12px;align-items:center;font-family:var(--f-d);font-size:.88rem}
+.dr-low{color:var(--text2)}
+.dr-high{font-weight:700}
+
+/* ── EXTRA CARDS ── */
+.extra-grid{
+  width:100%;max-width:900px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;
+}
+.extra-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px;transition:border-color var(--tr),transform var(--tr);
+}
+.extra-card:hover{border-color:rgba(var(--accent-rgb),.3);transform:translateY(-2px)}
+.ec-label{font-size:.68rem;font-family:var(--f-d);font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin-bottom:10px}
+.ec-val{font-family:var(--f-d);font-size:1.6rem;font-weight:800;color:var(--accent)}
+.ec-sub{font-size:.78rem;color:var(--text2);margin-top:5px}
+.uv-bar{height:6px;background:var(--muted);border-radius:4px;overflow:hidden;margin-top:10px}
+.uv-fill{height:100%;border-radius:4px}
+
+/* ── LOADING SPINNER ── */
+.loader{
+  width:100%;max-width:900px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:60px;
+}
+.spinner{
+  width:44px;height:44px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:.9rem;color:var(--text2);animation:fadeFlicker 1.5s ease infinite}
+@keyframes fadeFlicker{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+  .stats-strip .stat-block:nth-child(2){border-right:none}
+  .stats-strip .stat-block:nth-child(1),.stats-strip .stat-block:nth-child(2){border-bottom:1px solid var(--border)}
+  .extra-grid{grid-template-columns:1fr 1fr}
+  .main-top{grid-template-columns:1fr}
+  .weather-icon-big{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-logo">Sky<span>Lens</span></div>
+  <div class="last-updated" id="last-updated">Updated just now</div>
+</div>
+
+<!-- Search -->
+<div class="search-bar">
+  <input class="search-input" id="city-input" type="text" placeholder="Search any city in the world…" value="Kathmandu"/>
+  <button class="search-btn" id="search-btn">
+    🔍 Search
+  </button>
+</div>
+
+<!-- Quick cities -->
+<div class="quick-cities">
+  <button class="city-pill active" data-city="Kathmandu">🇳🇵 Kathmandu</button>
+  <button class="city-pill" data-city="Tokyo">🇯🇵 Tokyo</button>
+  <button class="city-pill" data-city="New York">🇺🇸 New York</button>
+  <button class="city-pill" data-city="London">🇬🇧 London</button>
+  <button class="city-pill" data-city="Dubai">🇦🇪 Dubai</button>
+  <button class="city-pill" data-city="Sydney">🇦🇺 Sydney</button>
+  <button class="city-pill" data-city="Paris">🇫🇷 Paris</button>
+</div>
+
+<!-- Content area -->
+<div id="weather-content" style="width:100%;max-width:900px;display:flex;flex-direction:column;align-items:center;gap:20px">
+</div>
+
+<script>
+// ── WEATHER DATA (simulated API) ───────────────────────────────────
+const CITY_DB = {
+  "Kathmandu": {
+    country:"Nepal",flag:"🇳🇵",temp:18,feelsLike:15,condition:"Partly Cloudy",
+    icon:"⛅",humidity:72,wind:12,visibility:10,uv:5,pressure:1010,dewpoint:12,
+    airQuality:42,aqLabel:"Good",sunrise:"05:48",sunset:"18:32",
+    hourly:[
+      {time:"Now",icon:"⛅",temp:18,rain:10},{time:"1PM",icon:"🌤",temp:19,rain:5},
+      {time:"2PM",icon:"☀️",temp:21,rain:0},{time:"3PM",icon:"☀️",temp:22,rain:0},
+      {time:"4PM",icon:"🌤",temp:20,rain:5},{time:"5PM",icon:"⛅",temp:18,rain:15},
+      {time:"6PM",icon:"🌧",temp:16,rain:65},{time:"7PM",icon:"🌧",temp:15,rain:70},
+      {time:"8PM",icon:"🌦",temp:14,rain:40},{time:"9PM",icon:"⛅",temp:13,rain:20},
+      {time:"10PM",icon:"🌙",temp:12,rain:5},{time:"11PM",icon:"🌙",temp:11,rain:0},
+    ],
+    week:[
+      {day:"Today",icon:"⛅",cond:"Partly Cloudy",low:11,high:22,bar:60},
+      {day:"Tue",icon:"🌧",cond:"Rainy",low:10,high:18,bar:40},
+      {day:"Wed",icon:"⛈",cond:"Thunderstorm",low:9,high:17,bar:30},
+      {day:"Thu",icon:"🌦",cond:"Light Rain",low:11,high:19,bar:50},
+      {day:"Fri",icon:"☀️",cond:"Sunny",low:13,high:24,bar:90},
+      {day:"Sat",icon:"🌤",cond:"Mostly Clear",low:14,high:25,bar:85},
+      {day:"Sun",icon:"☀️",cond:"Clear Sky",low:15,high:26,bar:95},
+    ],
+  },
+  "Tokyo": {
+    country:"Japan",flag:"🇯🇵",temp:24,feelsLike:26,condition:"Humid & Hazy",
+    icon:"🌫",humidity:85,wind:8,visibility:6,uv:7,pressure:1005,dewpoint:21,
+    airQuality:88,aqLabel:"Moderate",sunrise:"04:30",sunset:"19:00",
+    hourly:[
+      {time:"Now",icon:"🌫",temp:24,rain:20},{time:"1PM",icon:"🌤",temp:25,rain:10},
+      {time:"2PM",icon:"⛅",temp:26,rain:15},{time:"3PM",icon:"🌦",temp:25,rain:40},
+      {time:"4PM",icon:"🌧",temp:23,rain:70},{time:"5PM",icon:"🌧",temp:22,rain:80},
+      {time:"6PM",icon:"⛈",temp:21,rain:85},{time:"7PM",icon:"🌦",temp:22,rain:50},
+      {time:"8PM",icon:"⛅",temp:21,rain:20},{time:"9PM",icon:"🌙",temp:20,rain:10},
+      {time:"10PM",icon:"🌙",temp:19,rain:5},{time:"11PM",icon:"🌙",temp:18,rain:0},
+    ],
+    week:[
+      {day:"Today",icon:"🌫",cond:"Hazy",low:18,high:26,bar:50},
+      {day:"Tue",icon:"🌧",cond:"Rainy",low:17,high:22,bar:35},
+      {day:"Wed",icon:"⛈",cond:"Thunderstorms",low:16,high:20,bar:25},
+      {day:"Thu",icon:"🌦",cond:"Showers",low:17,high:23,bar:45},
+      {day:"Fri",icon:"🌤",cond:"Clearing",low:18,high:27,bar:75},
+      {day:"Sat",icon:"☀️",cond:"Sunny",low:19,high:29,bar:95},
+      {day:"Sun",icon:"☀️",cond:"Hot & Clear",low:20,high:31,bar:98},
+    ],
+  },
+  "New York": {
+    country:"United States",flag:"🇺🇸",temp:11,feelsLike:8,condition:"Windy & Clear",
+    icon:"💨",humidity:48,wind:34,visibility:16,uv:3,pressure:1022,dewpoint:1,
+    airQuality:28,aqLabel:"Good",sunrise:"06:10",sunset:"19:48",
+    hourly:[
+      {time:"Now",icon:"💨",temp:11,rain:0},{time:"1PM",icon:"🌤",temp:12,rain:0},
+      {time:"2PM",icon:"☀️",temp:14,rain:0},{time:"3PM",icon:"☀️",temp:14,rain:0},
+      {time:"4PM",icon:"🌤",temp:13,rain:5},{time:"5PM",icon:"⛅",temp:11,rain:10},
+      {time:"6PM",icon:"⛅",temp:10,rain:15},{time:"7PM",icon:"⛅",temp:9,rain:20},
+      {time:"8PM",icon:"🌙",temp:8,rain:10},{time:"9PM",icon:"🌙",temp:7,rain:5},
+      {time:"10PM",icon:"🌙",temp:7,rain:0},{time:"11PM",icon:"🌙",temp:6,rain:0},
+    ],
+    week:[
+      {day:"Today",icon:"💨",cond:"Windy",low:6,high:14,bar:70},
+      {day:"Tue",icon:"☀️",cond:"Sunny",low:5,high:16,bar:90},
+      {day:"Wed",icon:"🌤",cond:"Partly Cloudy",low:7,high:17,bar:80},
+      {day:"Thu",icon:"🌧",cond:"Rain",low:8,high:13,bar:45},
+      {day:"Fri",icon:"🌦",cond:"Showers",low:6,high:12,bar:40},
+      {day:"Sat",icon:"⛅",cond:"Overcast",low:5,high:11,bar:55},
+      {day:"Sun",icon:"☀️",cond:"Clear",low:4,high:13,bar:88},
+    ],
+  },
+  "London":{country:"United Kingdom",flag:"🇬🇧",temp:9,feelsLike:6,condition:"Overcast",icon:"☁️",humidity:88,wind:18,visibility:8,uv:2,pressure:1008,dewpoint:7,airQuality:35,aqLabel:"Good",sunrise:"05:55",sunset:"20:15",hourly:[{time:"Now",icon:"☁️",temp:9,rain:30},{time:"1PM",icon:"🌦",temp:10,rain:50},{time:"2PM",icon:"🌧",temp:10,rain:70},{time:"3PM",icon:"🌧",temp:9,rain:75},{time:"4PM",icon:"🌦",temp:8,rain:55},{time:"5PM",icon:"⛅",temp:8,rain:30},{time:"6PM",icon:"⛅",temp:7,rain:20},{time:"7PM",icon:"🌙",temp:7,rain:15},{time:"8PM",icon:"🌙",temp:6,rain:10},{time:"9PM",icon:"🌙",temp:5,rain:5},{time:"10PM",icon:"🌙",temp:5,rain:0},{time:"11PM",icon:"🌙",temp:5,rain:0}],week:[{day:"Today",icon:"☁️",cond:"Overcast",low:5,high:10,bar:40},{day:"Tue",icon:"🌧",cond:"Rainy",low:4,high:9,bar:35},{day:"Wed",icon:"🌦",cond:"Showers",low:5,high:11,bar:45},{day:"Thu",icon:"⛅",cond:"Cloudy",low:6,high:12,bar:55},{day:"Fri",icon:"🌤",cond:"Partly Sunny",low:7,high:14,bar:75},{day:"Sat",icon:"☀️",cond:"Bright",low:8,high:15,bar:85},{day:"Sun",icon:"🌤",cond:"Some Cloud",low:7,high:14,bar:70}]},
+  "Dubai":{country:"United Arab Emirates",flag:"🇦🇪",temp:38,feelsLike:44,condition:"Sunny & Humid",icon:"🌞",humidity:62,wind:15,visibility:12,uv:11,pressure:1000,dewpoint:30,airQuality:65,aqLabel:"Moderate",sunrise:"05:32",sunset:"18:48",hourly:[{time:"Now",icon:"🌞",temp:38,rain:0},{time:"1PM",icon:"☀️",temp:40,rain:0},{time:"2PM",icon:"☀️",temp:42,rain:0},{time:"3PM",icon:"☀️",temp:41,rain:0},{time:"4PM",icon:"🌤",temp:39,rain:0},{time:"5PM",icon:"🌤",temp:37,rain:0},{time:"6PM",icon:"⛅",temp:35,rain:0},{time:"7PM",icon:"🌆",temp:33,rain:0},{time:"8PM",icon:"🌙",temp:31,rain:0},{time:"9PM",icon:"🌙",temp:30,rain:0},{time:"10PM",icon:"🌙",temp:29,rain:0},{time:"11PM",icon:"🌙",temp:28,rain:0}],week:[{day:"Today",icon:"☀️",cond:"Scorching",low:28,high:42,bar:98},{day:"Tue",icon:"☀️",cond:"Sunny",low:28,high:41,bar:95},{day:"Wed",icon:"🌤",cond:"Hot",low:27,high:40,bar:90},{day:"Thu",icon:"⛅",cond:"Partly Cloudy",low:27,high:39,bar:85},{day:"Fri",icon:"☀️",cond:"Sunny",low:28,high:41,bar:95},{day:"Sat",icon:"☀️",cond:"Clear",low:29,high:42,bar:98},{day:"Sun",icon:"☀️",cond:"Very Hot",low:30,high:43,bar:99}]},
+  "Sydney":{country:"Australia",flag:"🇦🇺",temp:20,feelsLike:19,condition:"Mostly Clear",icon:"🌤",humidity:58,wind:20,visibility:20,uv:6,pressure:1018,dewpoint:12,airQuality:18,aqLabel:"Excellent",sunrise:"06:22",sunset:"17:58",hourly:[{time:"Now",icon:"🌤",temp:20,rain:5},{time:"1PM",icon:"☀️",temp:22,rain:0},{time:"2PM",icon:"☀️",temp:23,rain:0},{time:"3PM",icon:"🌤",temp:22,rain:5},{time:"4PM",icon:"⛅",temp:21,rain:10},{time:"5PM",icon:"⛅",temp:19,rain:15},{time:"6PM",icon:"🌆",temp:18,rain:10},{time:"7PM",icon:"🌙",temp:17,rain:5},{time:"8PM",icon:"🌙",temp:16,rain:0},{time:"9PM",icon:"🌙",temp:15,rain:0},{time:"10PM",icon:"🌙",temp:15,rain:0},{time:"11PM",icon:"🌙",temp:14,rain:0}],week:[{day:"Today",icon:"🌤",cond:"Mostly Clear",low:14,high:23,bar:80},{day:"Tue",icon:"☀️",cond:"Sunny",low:15,high:25,bar:90},{day:"Wed",icon:"☀️",cond:"Warm",low:16,high:26,bar:92},{day:"Thu",icon:"⛅",cond:"Some Cloud",low:15,high:24,bar:78},{day:"Fri",icon:"🌧",cond:"Rainy",low:13,high:19,bar:45},{day:"Sat",icon:"🌦",cond:"Showers",low:12,high:18,bar:42},{day:"Sun",icon:"🌤",cond:"Clearing",low:13,high:21,bar:70}]},
+  "Paris":{country:"France",flag:"🇫🇷",temp:14,feelsLike:11,condition:"Partly Cloudy",icon:"⛅",humidity:70,wind:14,visibility:12,uv:4,pressure:1015,dewpoint:9,airQuality:45,aqLabel:"Good",sunrise:"06:05",sunset:"20:05",hourly:[{time:"Now",icon:"⛅",temp:14,rain:15},{time:"1PM",icon:"🌤",temp:15,rain:5},{time:"2PM",icon:"☀️",temp:16,rain:0},{time:"3PM",icon:"☀️",temp:16,rain:0},{time:"4PM",icon:"🌤",temp:15,rain:10},{time:"5PM",icon:"⛅",temp:13,rain:20},{time:"6PM",icon:"🌦",temp:12,rain:45},{time:"7PM",icon:"🌧",temp:11,rain:60},{time:"8PM",icon:"🌧",temp:10,rain:55},{time:"9PM",icon:"🌦",temp:10,rain:35},{time:"10PM",icon:"⛅",temp:9,rain:15},{time:"11PM",icon:"🌙",temp:8,rain:5}],week:[{day:"Today",icon:"⛅",cond:"Partly Cloudy",low:8,high:16,bar:65},{day:"Tue",icon:"🌧",cond:"Rainy",low:7,high:13,bar:40},{day:"Wed",icon:"🌦",cond:"Showers",low:8,high:14,bar:50},{day:"Thu",icon:"🌤",cond:"Brightening",low:9,high:16,bar:72},{day:"Fri",icon:"☀️",cond:"Sunny",low:10,high:18,bar:90},{day:"Sat",icon:"☀️",cond:"Beautiful",low:11,high:19,bar:92},{day:"Sun",icon:"🌤",cond:"Warm",low:10,high:18,bar:80}]},
+};
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function getWeather(cityName) {
+  const content = document.getElementById('weather-content');
+
+  // Show loader
+  content.innerHTML = `<div class="loader"><div class="spinner"></div><p class="loader-text">Fetching weather for ${cityName}…</p></div>`;
+
+  // Simulate API delay
+  setTimeout(() => {
+    // Try exact match first, then partial
+    let data = CITY_DB[cityName];
+    if (!data) {
+      const key = Object.keys(CITY_DB).find(k => k.toLowerCase().includes(cityName.toLowerCase()) || cityName.toLowerCase().includes(k.toLowerCase()));
+      data = key ? CITY_DB[key] : null;
+    }
+
+    if (!data) {
+      // Unknown city: generate plausible random data
+      data = generateRandom(cityName);
+    }
+
+    renderWeather(cityName, data);
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+    // Update pills
+    document.querySelectorAll('.city-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.city === cityName || p.textContent.includes(cityName));
+    });
+  }, 700);
+}
+
+function generateRandom(city) {
+  const temp = Math.round(15 + Math.random()*20 - 5);
+  const conds = [["Sunny","☀️"],["Partly Cloudy","⛅"],["Overcast","☁️"],["Light Rain","🌦"],["Clear","🌤"]];
+  const [cond,icon] = conds[Math.floor(Math.random()*conds.length)];
+  return {
+    country:"Unknown Region",flag:"🌍",temp,feelsLike:temp-2,condition:cond,icon,
+    humidity:Math.round(50+Math.random()*40),wind:Math.round(8+Math.random()*20),
+    visibility:Math.round(8+Math.random()*12),uv:Math.round(2+Math.random()*8),
+    pressure:Math.round(1005+Math.random()*20),dewpoint:Math.round(temp-8),
+    airQuality:Math.round(20+Math.random()*60),aqLabel:"Moderate",
+    sunrise:"06:00",sunset:"18:30",
+    hourly:Array.from({length:12},(_,i)=>({time:i===0?"Now":`${i+12>12?i+12-12:i+12}${i+12>=12?'PM':'AM'}`,icon:icon,temp:temp+Math.round(Math.random()*4-2),rain:Math.round(Math.random()*30)})),
+    week:['Today','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>({day:d,icon,cond,low:temp-5,high:temp+5,bar:Math.round(50+Math.random()*45)})),
+  };
+}
+
+function getUVColor(uv) {
+  if (uv <= 2) return '#34d399';
+  if (uv <= 5) return '#fbbf24';
+  if (uv <= 7) return '#f97316';
+  return '#f87171';
+}
+
+function getUVLabel(uv) {
+  if (uv <= 2) return 'Low';
+  if (uv <= 5) return 'Moderate';
+  if (uv <= 7) return 'High';
+  return 'Very High';
+}
+
+function getAQColor(aq) {
+  if (aq <= 50) return '#34d399';
+  if (aq <= 100) return '#fbbf24';
+  return '#f87171';
+}
+
+function renderWeather(cityName, d) {
+  const content = document.getElementById('weather-content');
+
+  content.innerHTML = `
+  <!-- MAIN CARD -->
+  <div class="main-card" style="width:100%">
+    <div class="main-top">
+      <div>
+        <div class="city-name">${cityName} ${d.flag}</div>
+        <div class="country-row"><span>📍</span>${d.country} &nbsp;·&nbsp; <span>${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</span></div>
+        <div class="temp-big">${d.temp}<span class="unit">°C</span></div>
+        <div class="condition">${d.icon} ${d.condition}</div>
+        <div class="feels">Feels like ${d.feelsLike}°C</div>
+      </div>
+      <div class="weather-icon-big">${d.icon}</div>
+    </div>
+    <div class="stats-strip">
+      <div class="stat-block"><div class="sb-icon">💧</div><div class="sb-val">${d.humidity}%</div><div class="sb-lbl">Humidity</div></div>
+      <div class="stat-block"><div class="sb-icon">🌬️</div><div class="sb-val">${d.wind} km/h</div><div class="sb-lbl">Wind</div></div>
+      <div class="stat-block"><div class="sb-icon">👁️</div><div class="sb-val">${d.visibility} km</div><div class="sb-lbl">Visibility</div></div>
+      <div class="stat-block"><div class="sb-icon">🔵</div><div class="sb-val">${d.pressure} hPa</div><div class="sb-lbl">Pressure</div></div>
+    </div>
+  </div>
+
+  <!-- HOURLY -->
+  <div class="forecast-section" style="width:100%">
+    <p class="sec-title">24-Hour Forecast</p>
+    <div class="hourly-scroll">
+      ${d.hourly.map((h,i) => `
+        <div class="hour-item ${i===0?'now':''}">
+          <div class="h-time">${h.time}</div>
+          <div class="h-icon">${h.icon}</div>
+          <div class="h-temp">${h.temp}°</div>
+          ${h.rain > 0 ? `<div class="h-rain">💧${h.rain}%</div>` : '<div class="h-rain" style="opacity:0">0%</div>'}
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- 7-DAY -->
+  <div class="forecast-section" style="width:100%">
+    <p class="sec-title">7-Day Forecast</p>
+    <div class="week-list">
+      ${d.week.map((w,i)=>`
+        <div class="day-row ${i===0?'today-row':''}">
+          <span class="dr-day">${w.day}</span>
+          <span class="dr-icon">${w.icon}</span>
+          <span class="dr-cond">${w.cond}</span>
+          <div class="dr-bar"><div class="dr-bar-fill" style="width:${w.bar}%"></div></div>
+          <div class="dr-temps">
+            <span class="dr-low">${w.low}°</span>
+            <span class="dr-high">${w.high}°</span>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- EXTRA CARDS -->
+  <div class="extra-grid" style="width:100%">
+    <div class="extra-card">
+      <div class="ec-label">☀️ UV Index</div>
+      <div class="ec-val" style="color:${getUVColor(d.uv)}">${d.uv}</div>
+      <div class="ec-sub">${getUVLabel(d.uv)} — ${d.uv>=6?'Use sunscreen!':'Low risk'}</div>
+      <div class="uv-bar"><div class="uv-fill" style="width:${Math.min(d.uv/12*100,100)}%;background:${getUVColor(d.uv)}"></div></div>
+    </div>
+    <div class="extra-card">
+      <div class="ec-label">🌅 Sun Times</div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <div><div style="font-size:.7rem;color:var(--text2)">Sunrise</div><div style="font-family:var(--f-d);font-size:1.1rem;font-weight:700;color:var(--accent)">${d.sunrise}</div></div>
+        <div style="color:var(--text2);display:flex;align-items:center">→</div>
+        <div><div style="font-size:.7rem;color:var(--text2)">Sunset</div><div style="font-family:var(--f-d);font-size:1.1rem;font-weight:700;color:var(--accent)">${d.sunset}</div></div>
+      </div>
+      <div class="ec-sub" style="margin-top:10px">Dew Point: ${d.dewpoint}°C</div>
+    </div>
+    <div class="extra-card">
+      <div class="ec-label">🍃 Air Quality</div>
+      <div class="ec-val" style="color:${getAQColor(d.airQuality)}">${d.airQuality}</div>
+      <div class="ec-sub">${d.aqLabel} — AQI</div>
+      <div class="uv-bar"><div class="uv-fill" style="width:${Math.min(d.airQuality/200*100,100)}%;background:${getAQColor(d.airQuality)}"></div></div>
+    </div>
+  </div>`;
+}
+
+// ── EVENT HANDLERS ─────────────────────────────────────────────────
+document.getElementById('search-btn').addEventListener('click', () => {
+  const city = document.getElementById('city-input').value.trim();
+  if (city) getWeather(city);
+});
+
+document.getElementById('city-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const city = e.target.value.trim();
+    if (city) getWeather(city);
+  }
+});
+
+document.querySelectorAll('.city-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    const city = this.dataset.city;
+    document.getElementById('city-input').value = city;
+    getWeather(city);
+  });
+});
+
+// ── INIT ───────────────────────────────────────────────────────────
+getWeather('Kathmandu');
+</script>
+</body>
+</html>
