@@ -14,12 +14,12 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Apil Shrestha — Developer & Designer" />
   <meta property="og:description" content="Student, Developer & Designer based in Kathmandu, Nepal." />
-  <meta property="og:image" content="https://ui-avatars.com/api/?name=Apil+Shrestha&size=600&background=e8ff47&color=0a0a0c&font-size=0.33&bold=true" />
+  <meta property="og:image" content="https://ui-avatars.com/api/?name=Apil+Shrestha&size=600&background=3b82f6&color=0a0a0c&font-size=0.33&bold=true" />
   <meta name="twitter:card" content="summary_large_image" />
   <title>Apil Shrestha — Developer & Designer</title>
   <link rel="canonical" href="https://apilshrestha.dev" />
   <!-- SVG Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e8ff47'/><text y='.9em' font-size='70' x='12' font-family='sans-serif' font-weight='bold'>A</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233b82f6'/><text y='.9em' font-size='70' x='12' font-family='sans-serif' font-weight='bold'>A</text></svg>" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,8 +35,8 @@
       --surface:    #111120;
       --surface2:   #18182a;
       --border:     #20203a;
-      --accent:     #e8ff47;
-      --accent-rgb: 232,255,71;
+      --accent:     #3b82f6;
+      --accent-rgb: 59,130,246;
       --text:       #eeedf8;
       --text2:      #9898b8;
       --muted:      #50506a;
@@ -69,11 +69,11 @@
        RESET
        ================================================================ */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
+    html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
     body{
       background:var(--bg);color:var(--text);
       font-family:var(--font-b);font-weight:300;line-height:1.75;
-      overflow-x:hidden;
+      overflow-x:hidden;width:100%;
       transition:background var(--tr),color var(--tr);
     }
     a{color:inherit;text-decoration:none}
@@ -213,7 +213,7 @@
        HERO
        ================================================================ */
     #hero{
-      min-height:100vh;display:flex;align-items:center;
+      min-height:100vh;min-height:100svh;display:flex;align-items:center;
       padding-top:var(--nav-h);position:relative;overflow:hidden;
     }
 
@@ -256,8 +256,9 @@
     }
 
     .hero-name{
-      font-family:var(--font-d);font-size:clamp(3.5rem,9.5vw,7.5rem);
+      font-family:var(--font-d);font-size:clamp(2.5rem,9.5vw,7.5rem);
       font-weight:800;line-height:.95;letter-spacing:-.045em;margin-bottom:18px;
+      word-wrap:break-word;
       animation:slideDown .9s .1s var(--ease) both;
     }
     .hero-name .dot{color:var(--accent)}
@@ -492,7 +493,7 @@
     }
     .c-item:hover .c-icon{background:var(--accent);border-color:var(--accent)}
     .c-lbl{font-size:.73rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--font-d);font-weight:600}
-    .c-val,.c-val a{font-size:.94rem;color:var(--text2);transition:color var(--tr)}
+    .c-val,.c-val a{font-size:.94rem;color:var(--text2);transition:color var(--tr);word-break:break-word}
     .c-item:hover .c-val,.c-item:hover .c-val a{color:var(--accent)}
 
     .cf{display:flex;flex-direction:column;gap:17px}
@@ -572,8 +573,9 @@
       .proj-grid{grid-template-columns:1fr}
     }
     @media(max-width:480px){
+      .container{padding:0 20px}
       .about-stats{grid-template-columns:repeat(2,1fr)}
-       .btn-prim,.btn-out{padding:12px 20px;font-size:.82rem}
+      .skills-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -677,7 +679,7 @@
       <div class="img-wrap reveal">
         <div class="img-frame">
           <img
-            src="https://ui-avatars.com/api/?name=Apil+Shrestha&size=600&background=1a1a2e&color=e8ff47&font-size=0.33&bold=true"
+            src="https://ui-avatars.com/api/?name=Apil+Shrestha&size=600&background=1a1a2e&color=3b82f6&font-size=0.33&bold=true"
             alt="Portrait of Apil Shrestha"
             width="600" height="750" loading="lazy"
           />
@@ -708,7 +710,7 @@
           <span class="tag">🇳🇵 Kathmandu</span>
         </div>
         <div style="margin-top:32px">
-          <a href="/cdn-cgi/l/email-protection#abd8c3d9ced8dfc3cacadbc2c7999bebccc6cac2c785c8c4c6" class="btn-prim">Say Hello 👋</a>
+          <a href="mailto:shresthaapil20@gmail.com" class="btn-prim">Say Hello 👋</a>
         </div>
       </div>
 
@@ -800,7 +802,7 @@
             <span class="p-tag">HTML</span><span class="p-tag">CSS</span><span class="p-tag">JavaScript</span><span class="p-tag">Responsive</span>
           </div>
           <div class="proj-links">
-            <a href="projects/ecommerce.html" target="_blank" rel="noopener noreferrer" class="proj-link">↗ Live Demo</a>
+            <a href="projects/ecommerce.html" class="proj-link" aria-label="Live demo" target="_blank">↗ Live Demo</a>
             <a href="#" class="proj-link" aria-label="GitHub" target="_blank">⌥ GitHub</a>
           </div>
         </div>
@@ -818,7 +820,7 @@
           <p class="proj-desc">A CLI weather tool using OpenWeatherMap API — fetches real-time data for any city and displays it in a colourful, readable terminal output.</p>
           <div class="proj-tags"><span class="p-tag">Python</span><span class="p-tag">API</span><span class="p-tag">CLI</span></div>
           <div class="proj-links">
-            <a href="projects/weather.html" target="_blank" rel="noopener noreferrer" class="proj-link">↗ Live Demo</a>
+            <a href="projects/weather.html" class="proj-link" target="_blank">↗ Demo</a>
             <a href="#" class="proj-link" target="_blank">⌥ GitHub</a>
           </div>
         </div>
@@ -836,7 +838,7 @@
           <p class="proj-desc">The very site you're on — designed and built from scratch with dark/light mode, typing effect, scroll animations and full responsiveness.</p>
           <div class="proj-tags"><span class="p-tag">HTML</span><span class="p-tag">CSS</span><span class="p-tag">JavaScript</span></div>
           <div class="proj-links">
-            <a href="#hero" class="proj-link" target="_blank">↗ You're here!</a>
+            <a href="#" class="proj-link">↗ You're here!</a>
             <a href="#" class="proj-link" target="_blank">⌥ GitHub</a>
           </div>
         </div>
@@ -854,7 +856,7 @@
           <p class="proj-desc">A minimal to-do manager with localStorage persistence, drag-to-reorder, priority labels, and a slick dark UI — pure Vanilla JavaScript.</p>
           <div class="proj-tags"><span class="p-tag">JavaScript</span><span class="p-tag">LocalStorage</span><span class="p-tag">CSS</span></div>
           <div class="proj-links">
-            <a href="projects/taskmanager.html" target="_blank" rel="noopener noreferrer" class="proj-link">↗ Live Demo</a>
+            <a href="projects/taskmanager.html" class="proj-link" target="_blank">↗ Demo</a>
             <a href="#" class="proj-link" target="_blank">⌥ GitHub</a>
           </div>
         </div>
@@ -872,7 +874,7 @@
           <p class="proj-desc">A static web platform for organising student study groups — featuring a schedule board, resource links, and a note-sharing section for classmates.</p>
           <div class="proj-tags"><span class="p-tag">HTML</span><span class="p-tag">CSS</span><span class="p-tag">JavaScript</span></div>
           <div class="proj-links">
-            <a href="projects/studygroup.html" target="_blank" rel="noopener noreferrer" class="proj-link">↗ Live Demo</a>
+            <a href="projects/studygroup.html" class="proj-link" target="_blank">↗ Demo</a>
             <a href="#" class="proj-link" target="_blank">⌥ GitHub</a>
           </div>
         </div>
@@ -941,7 +943,7 @@
             <div class="c-icon" aria-hidden="true">📧</div>
             <div>
               <p class="c-lbl">Email</p>
-              <p class="c-val"><a href="/cdn-cgi/l/email-protection#c8bba0baadbbbca0a9a9b8a1a4faf888afa5a9a1a4e6aba7a5"><span class="__cf_email__" data-cfemail="24574c564157504c4545544d481614644349454d480a474b49">[email&#160;protected]</span></a></p>
+              <p class="c-val"><a href="mailto:shresthaapil20@gmail.com">shresthaapil20@gmail.com</a></p>
             </div>
           </div>
           <div class="c-item">
@@ -998,7 +1000,7 @@
         © <span id="yr"></span> <span>Apil Shrestha</span>. Crafted with ❤️ in Kathmandu.
       </p>
       <div class="socials">
-        <a href="/cdn-cgi/l/email-protection#6f1c071d0a1c1b070e0e1f06035d5f2f08020e0603410c0002" class="soc" aria-label="Email">✉</a>
+        <a href="mailto:shresthaapil20@gmail.com" class="soc" aria-label="Email">✉</a>
         <a href="https://www.instagram.com/stha.apil/" target="_blank" rel="noopener noreferrer" class="soc" aria-label="Instagram">✦</a>
         <a href="#" class="soc" aria-label="GitHub">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -1017,7 +1019,7 @@
 <!-- ================================================================
      JAVASCRIPT
      ================================================================ -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
   /* ── Helpers ──────────────────────────────────────────────────── */
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
@@ -1154,7 +1156,7 @@
     // Simulate async send (replace with actual API call)
     setTimeout(() => {
       cf.reset();
-      btn.innerHTML = 'Send Message ✈';
+      btn.innerHTML = 'Send Message <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="currentColor"/></svg>';
       btn.disabled = false;
       fsuccess.classList.add('show');
       setTimeout(() => fsuccess.classList.remove('show'), 5500);
