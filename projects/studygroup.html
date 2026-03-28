@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyNest — Study Group Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#050510;--bg2:#090916;--surf:#0f0f20;--surf2:#161628;
+  --border:#1c1c34;--accent:#c084fc;--accent-rgb:192,132,252;
+  --accent2:#38bdf8;--a2-rgb:56,189,248;
+  --text:#f0eeff;--text2:#8080a8;--muted:#3a3a5c;
+  --green:#34d399;--yellow:#fbbf24;--red:#f87171;
+  --f-d:'Syne',sans-serif;--f-b:'DM Sans',sans-serif;
+  --r:12px;--r-sm:8px;--tr:.28s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--f-b);font-weight:300;min-height:100vh}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+input,textarea,select{font-family:inherit}
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+/* ── HEADER ── */
+header{
+  padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+  background:rgba(5,5,16,.88);backdrop-filter:blur(16px);
+}
+.logo{font-family:var(--f-d);font-size:1.2rem;font-weight:800;letter-spacing:-.04em}
+.logo span{color:var(--accent)}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-right .avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-d);font-size:.85rem;font-weight:700;color:var(--bg);
+}
+.nav-tabs{display:flex;gap:4px}
+.ntab{
+  padding:7px 16px;border-radius:100px;font-size:.82rem;font-weight:400;color:var(--text2);
+  transition:background var(--tr),color var(--tr);
+}
+.ntab.active{background:var(--surf2);color:var(--text);border:1px solid var(--border)}
+.ntab:hover:not(.active){color:var(--text)}
+
+/* ── MAIN ── */
+.app{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 60px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  border-right:1px solid var(--border);background:var(--bg2);
+  padding:20px 16px;display:flex;flex-direction:column;gap:6px;
+  position:sticky;top:60px;max-height:calc(100vh - 60px);overflow-y:auto;
+}
+.sidebar-section{margin-bottom:8px}
+.sbl{font-family:var(--f-d);font-size:.66rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text2);padding:8px 10px 4px}
+.group-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;cursor:pointer;
+  transition:background var(--tr),color var(--tr);font-size:.88rem;
+  position:relative;
+}
+.group-item:hover{background:var(--surf2)}
+.group-item.active{background:rgba(var(--accent-rgb),.12);color:var(--accent)}
+.group-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--accent);border-radius:0 2px 2px 0}
+.group-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.group-badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:100px;padding:2px 7px;font-size:.68rem}
+.group-item.active .group-badge{background:rgba(var(--accent-rgb),.2);border-color:rgba(var(--accent-rgb),.3)}
+
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:onlinePulse 2s infinite}
+@keyframes onlinePulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{box-shadow:0 0 0 4px rgba(52,211,153,0)}}
+
+/* ── CONTENT AREA ── */
+.content{padding:28px;overflow-y:auto;max-height:calc(100vh - 60px)}
+.page{display:none}
+.page.active{display:block}
+
+/* ── DASHBOARD PAGE ── */
+.welcome-banner{
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.1) 0%,rgba(var(--a2-rgb),.08) 100%);
+  border:1px solid rgba(var(--accent-rgb),.2);border-radius:16px;
+  padding:28px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+}
+.wb-text h2{font-family:var(--f-d);font-size:1.5rem;font-weight:800;margin-bottom:6px}
+.wb-text p{font-size:.9rem;color:var(--text2)}
+.wb-emoji{font-size:4rem;filter:drop-shadow(0 0 20px rgba(var(--accent-rgb),.3))}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px;transition:border-color var(--tr);
+}
+.stat-card:hover{border-color:rgba(var(--accent-rgb),.3)}
+.sc-val{font-family:var(--f-d);font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1}
+.sc-lbl{font-size:.78rem;color:var(--text2);margin-top:6px;text-transform:uppercase;letter-spacing:.06em}
+
+/* Upcoming sessions */
+.section-title{font-family:var(--f-d);font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:14px}
+.sessions-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.session-item{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;display:flex;align-items:center;gap:16px;
+  transition:border-color var(--tr),transform var(--tr);
+}
+.session-item:hover{border-color:rgba(var(--accent-rgb),.3);transform:translateX(3px)}
+.si-time{
+  background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.2);
+  border-radius:9px;padding:10px 14px;text-align:center;flex-shrink:0;min-width:70px;
+}
+.si-time .day{font-size:.68rem;color:var(--accent);font-family:var(--f-d);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.si-time .time{font-size:.85rem;font-family:var(--f-d);font-weight:700;margin-top:2px}
+.si-info h4{font-family:var(--f-d);font-size:.9rem;font-weight:700;margin-bottom:3px}
+.si-info p{font-size:.78rem;color:var(--text2)}
+.si-tag{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:100px;padding:4px 12px;font-size:.72rem;color:var(--text2)}
+.join-btn{
+  margin-left:auto;background:var(--accent);color:var(--bg);font-family:var(--f-d);
+  font-size:.75rem;font-weight:700;letter-spacing:.04em;padding:7px 16px;border-radius:100px;
+  transition:opacity var(--tr),transform .2s;
+}
+.join-btn:hover{opacity:.85;transform:translateY(-1px)}
+
+/* Quick note */
+.quick-note{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:20px;
+}
+.quick-note textarea{
+  width:100%;background:transparent;border:none;color:var(--text);font-size:.9rem;
+  line-height:1.7;resize:none;min-height:100px;outline:none;
+}
+.qn-footer{display:flex;justify-content:flex-end;margin-top:10px}
+.save-note-btn{
+  background:var(--accent);color:var(--bg);font-family:var(--f-d);
+  font-size:.78rem;font-weight:700;padding:8px 18px;border-radius:100px;
+  transition:opacity var(--tr);
+}
+.save-note-btn:hover{opacity:.85}
+
+/* ── SCHEDULE PAGE ── */
+.schedule-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:24px}
+.day-col{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.day-hdr{
+  padding:12px;text-align:center;border-bottom:1px solid var(--border);
+  font-family:var(--f-d);font-size:.75rem;font-weight:700;
+}
+.day-hdr.today{background:rgba(var(--accent-rgb),.1);color:var(--accent)}
+.day-slots{padding:10px;display:flex;flex-direction:column;gap:6px;min-height:100px}
+.sched-item{
+  background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.2);
+  border-radius:7px;padding:7px 9px;font-size:.73rem;
+}
+.sched-item.blue{background:rgba(var(--a2-rgb),.08);border-color:rgba(var(--a2-rgb),.2)}
+.sched-item.green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2)}
+.sched-item .s-subj{font-family:var(--f-d);font-weight:600;font-size:.73rem;margin-bottom:2px}
+.sched-item .s-time{color:var(--text2);font-size:.65rem}
+
+/* Add session form */
+.add-session-form{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+  padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:14px;align-items:end;
+}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text2)}
+.fg input,.fg select{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 13px;color:var(--text);font-size:.85rem;outline:none;
+  transition:border-color var(--tr);
+}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+
+/* ── RESOURCES PAGE ── */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.res-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px;transition:border-color var(--tr),transform var(--tr),box-shadow var(--tr);
+}
+.res-card:hover{border-color:rgba(var(--accent-rgb),.35);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.res-icon{font-size:2rem;margin-bottom:12px}
+.res-type{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-family:var(--f-d);font-weight:600;margin-bottom:5px}
+.res-title{font-family:var(--f-d);font-size:.95rem;font-weight:700;margin-bottom:5px}
+.res-desc{font-size:.8rem;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.res-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
+.res-subject{font-size:.72rem;color:var(--text2);background:var(--surf2);border:1px solid var(--border);border-radius:100px;padding:3px 9px}
+.open-btn{font-size:.78rem;color:var(--accent);transition:opacity var(--tr)}
+.open-btn:hover{opacity:.7}
+
+/* ── NOTES PAGE ── */
+.notes-layout{display:grid;grid-template-columns:240px 1fr;gap:20px}
+.notes-list{display:flex;flex-direction:column;gap:8px}
+.note-item{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--r-sm,8px);
+  padding:14px;cursor:pointer;transition:border-color var(--tr);
+}
+.note-item.active{border-color:var(--accent)}
+.note-item:hover:not(.active){border-color:var(--border);background:var(--surf2)}
+.ni-title{font-family:var(--f-d);font-size:.88rem;font-weight:600;margin-bottom:4px}
+.ni-preview{font-size:.75rem;color:var(--text2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical}
+.ni-meta{font-size:.68rem;color:var(--muted);margin-top:6px}
+.note-editor{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:16px}
+.note-editor input{background:transparent;border:none;font-family:var(--f-d);font-size:1.3rem;font-weight:700;color:var(--text);outline:none;width:100%}
+.note-editor textarea{
+  background:transparent;border:none;color:var(--text);font-size:.9rem;
+  line-height:1.85;resize:none;flex:1;min-height:380px;outline:none;
+}
+.note-toolbar{display:flex;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ntool{
+  background:var(--surf2);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;font-size:.78rem;transition:background var(--tr),border-color var(--tr);
+}
+.ntool:hover{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--surf2);border:1px solid var(--border);
+  border-radius:100px;padding:11px 22px;font-size:.85rem;z-index:9999;
+  opacity:0;transform:translateY(8px);transition:.3s;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── SHARED ── */
+.page-title{font-family:var(--f-d);font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
+.page-sub{font-size:.9rem;color:var(--text2);margin-bottom:28px}
+.btn-add{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--accent);color:var(--bg);font-family:var(--f-d);
+  font-size:.82rem;font-weight:700;letter-spacing:.04em;padding:10px 20px;
+  border-radius:100px;transition:opacity var(--tr),transform .2s;
+}
+.btn-add:hover{opacity:.9;transform:translateY(-1px)}
+.btn-out{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--text2);font-family:var(--f-d);
+  font-size:.82rem;font-weight:500;padding:10px 18px;border-radius:100px;
+  border:1px solid var(--border);transition:border-color var(--tr),color var(--tr);
+}
+.btn-out:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .schedule-grid{grid-template-columns:repeat(4,1fr)}
+  .notes-layout{grid-template-columns:1fr}
+  .add-session-form{grid-template-columns:1fr 1fr}
+  .content{padding:16px;max-height:none}
+  header{padding:0 14px}
+  .nav-tabs .ntab{padding:6px 10px;font-size:.76rem}
+}
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .schedule-grid{grid-template-columns:repeat(2,1fr)}
+  .welcome-banner{flex-direction:column;padding:18px;gap:12px}
+  .wb-emoji{font-size:2.5rem}
+  .session-item{flex-wrap:wrap;gap:10px}
+  .si-tag,.join-btn{margin-left:0}
+  .add-session-form{grid-template-columns:1fr}
+  header{padding:0 10px}
+  .nav-tabs{display:none}
+  .hdr-right .avatar{width:30px;height:30px;font-size:.75rem}
+}
+
+    /* ================================================================
+       ONBOARDING MODAL
+       ================================================================ */
+    #onboard-overlay {
+      position:fixed;inset:0;background:rgba(0,0,0,.75);
+      z-index:9000;display:flex;align-items:center;justify-content:center;
+      padding:20px;backdrop-filter:blur(8px);
+    }
+    #onboard-overlay.hidden { display:none; }
+    .onboard-box {
+      background:var(--surf);border:1px solid var(--border);border-radius:20px;
+      padding:40px 36px;max-width:440px;width:100%;text-align:center;
+      animation:obPop .4s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes obPop { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
+    .ob-emoji { font-size:3.5rem;margin-bottom:16px;display:block; }
+    .ob-title {
+      font-family:var(--f-d);font-size:1.5rem;font-weight:800;
+      letter-spacing:-.03em;margin-bottom:8px;
+    }
+    .ob-sub { font-size:.9rem;color:var(--text2);margin-bottom:28px;line-height:1.6; }
+    .ob-input {
+      width:100%;background:var(--bg2);border:1.5px solid var(--border);
+      border-radius:10px;padding:13px 16px;color:var(--text);
+      font-family:var(--f-d);font-size:1rem;font-weight:600;
+      outline:none;text-align:center;
+      transition:border-color .25s;margin-bottom:10px;
+    }
+    .ob-input:focus { border-color:var(--accent); }
+    .ob-hint { font-size:.75rem;color:var(--muted);margin-bottom:20px; }
+    .ob-btn {
+      width:100%;background:var(--accent);color:var(--bg);
+      font-family:var(--f-d);font-size:.95rem;font-weight:700;
+      letter-spacing:.04em;padding:14px;border-radius:100px;
+      border:none;cursor:pointer;
+      transition:opacity .2s,transform .2s;
+    }
+    .ob-btn:hover { opacity:.9;transform:translateY(-1px); }
+    .ob-skip {
+      display:block;margin-top:14px;font-size:.78rem;color:var(--muted);
+      cursor:pointer;transition:color .2s;
+    }
+    .ob-skip:hover { color:var(--text2); }
+
+    /* User chip in header */
+    .user-chip {
+      display:flex;align-items:center;gap:9px;cursor:pointer;
+      background:var(--surf2);border:1px solid var(--border);
+      border-radius:100px;padding:5px 14px 5px 5px;
+      transition:border-color .25s;
+    }
+    .user-chip:hover { border-color:var(--accent); }
+    .user-chip .uc-avatar {
+      width:28px;height:28px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--f-d);font-size:.72rem;font-weight:700;color:var(--bg);
+      flex-shrink:0;
+    }
+    .user-chip .uc-name {
+      font-family:var(--f-d);font-size:.82rem;font-weight:600;max-width:100px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     ONBOARDING MODAL
+     ================================================================ -->
+<div id="onboard-overlay">
+  <div class="onboard-box">
+    <span class="ob-emoji">📚</span>
+    <h2 class="ob-title">Welcome to StudyNest</h2>
+    <p class="ob-sub">Your collaborative study platform. Tell us your name so we can personalise your experience.</p>
+    <input class="ob-input" id="ob-name" type="text" placeholder="Enter your name…" maxlength="30" autocomplete="off"/>
+    <p class="ob-hint">Only stored locally on your device.</p>
+    <button class="ob-btn" id="ob-btn">Let's Go →</button>
+    <span class="ob-skip" id="ob-skip">Skip for now</span>
+  </div>
+</div>
+
+<header>
+  <div class="logo">Study<span>Nest</span></div>
+  <nav class="nav-tabs">
+    <button class="ntab active" data-page="dashboard">Dashboard</button>
+    <button class="ntab" data-page="schedule">Schedule</button>
+    <button class="ntab" data-page="resources">Resources</button>
+    <button class="ntab" data-page="notes">Notes</button>
+  </nav>
+  <div class="hdr-right">
+    <div class="user-chip" id="user-chip" onclick="resetUser()" title="Click to change name">
+      <div class="uc-avatar" id="uc-avatar">?</div>
+      <span class="uc-name" id="uc-name">Guest</span>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sbl">My Groups</div>
+      <div class="group-item active">
+        <div class="group-dot" style="background:#c084fc"></div>
+        <span>CS50 Study Circle</span>
+        <div class="online-dot"></div>
+        <span class="group-badge">5</span>
+      </div>
+      <div class="group-item">
+        <div class="group-dot" style="background:#38bdf8"></div>
+        <span>Maths Warriors</span>
+        <span class="group-badge">3</span>
+      </div>
+      <div class="group-item">
+        <div class="group-dot" style="background:#34d399"></div>
+        <span>Physics Lab</span>
+        <span class="group-badge">4</span>
+      </div>
+      <div class="group-item">
+        <div class="group-dot" style="background:#fbbf24"></div>
+        <span>Design Club</span>
+        <span class="group-badge">7</span>
+      </div>
+    </div>
+    <div class="sidebar-section" style="margin-top:8px">
+      <div class="sbl">Online Now</div>
+      <div class="group-item">
+        <div class="online-dot"></div>
+        <span style="font-size:.85rem">Rohan Sharma</span>
+      </div>
+      <div class="group-item">
+        <div class="online-dot"></div>
+        <span style="font-size:.85rem">Priya Thapa</span>
+      </div>
+      <div class="group-item">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--text2)"></div>
+        <span style="font-size:.85rem;color:var(--text2)">Sujal KC</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="welcome-banner">
+        <div class="wb-text">
+          <h2 id="welcome-msg">Welcome! 👋</h2>
+          <p>You have 3 sessions scheduled this week. Keep it up!</p>
+        </div>
+        <div class="wb-emoji">📚</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="sc-val">4</div><div class="sc-lbl">Study Groups</div></div>
+        <div class="stat-card"><div class="sc-val">12</div><div class="sc-lbl">Sessions This Month</div></div>
+        <div class="stat-card"><div class="sc-val" style="color:var(--green)">8</div><div class="sc-lbl">Resources Shared</div></div>
+        <div class="stat-card"><div class="sc-val" style="color:var(--accent2)">23</div><div class="sc-lbl">Notes Created</div></div>
+      </div>
+
+      <p class="section-title">Upcoming Sessions</p>
+      <div class="sessions-list">
+        <div class="session-item">
+          <div class="si-time"><div class="day">Mon</div><div class="time">4:00 PM</div></div>
+          <div class="si-info"><h4>CS50 Problem Set Review</h4><p>CS50 Study Circle · 5 members attending</p></div>
+          <button class="join-btn">Join →</button>
+        </div>
+        <div class="session-item">
+          <div class="si-time"><div class="day">Wed</div><div class="time">2:30 PM</div></div>
+          <div class="si-info"><h4>Integration Practice</h4><p>Maths Warriors · 3 members attending</p></div>
+          <button class="join-btn">Join →</button>
+        </div>
+        <div class="session-item">
+          <div class="si-time"><div class="day">Fri</div><div class="time">5:00 PM</div></div>
+          <div class="si-info"><h4>Design Critique Session</h4><p>Design Club · 7 members attending</p></div>
+          <button class="join-btn">Join →</button>
+        </div>
+      </div>
+
+      <p class="section-title">Quick Note</p>
+      <div class="quick-note">
+        <textarea id="quick-note-area" placeholder="Jot something down quickly…">- Review arrays in C before Monday
+- Download lecture slides for Physics
+- Finish UI sketch by Friday</textarea>
+        <div class="qn-footer">
+          <button class="save-note-btn" onclick="toast('Note saved! ✅')">Save Note</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
+        <div><h1 class="page-title">Weekly Schedule</h1><p class="page-sub" style="margin-bottom:0">Manage and view all group study sessions.</p></div>
+      </div>
+
+      <div class="schedule-grid" id="sched-grid"></div>
+
+      <p class="section-title" style="margin-bottom:14px">Add New Session</p>
+      <div class="add-session-form">
+        <div class="fg"><label>Subject</label><input type="text" id="s-subj" placeholder="e.g. Physics"/></div>
+        <div class="fg"><label>Day</label>
+          <select id="s-day">
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+        </div>
+        <div class="fg"><label>Time</label><input type="time" id="s-time" value="15:00"/></div>
+        <button class="btn-add" onclick="addSession()">＋ Add</button>
+      </div>
+    </div>
+
+    <!-- RESOURCES -->
+    <div class="page" id="page-resources">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
+        <div><h1 class="page-title">Resources</h1><p class="page-sub" style="margin-bottom:0">Shared links, notes, and study materials.</p></div>
+        <button class="btn-add" onclick="addResource()">＋ Share Resource</button>
+      </div>
+
+      <div class="res-grid" id="res-grid"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="page" id="page-notes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div><h1 class="page-title">Notes</h1><p class="page-sub" style="margin-bottom:0">Your personal study notes.</p></div>
+        <button class="btn-add" onclick="addNote()">＋ New Note</button>
+      </div>
+      <div class="notes-layout">
+        <div class="notes-list" id="notes-list"></div>
+        <div class="note-editor" id="note-editor">
+          <div class="note-toolbar">
+            <button class="ntool" onclick="fmt('bold')"><b>B</b></button>
+            <button class="ntool" onclick="fmt('italic')"><i>I</i></button>
+            <button class="ntool" onclick="fmt('h1')">H1</button>
+            <button class="ntool" onclick="fmt('bullet')">• List</button>
+            <button class="ntool" onclick="fmt('code')">Code</button>
+            <button class="ntool" onclick="saveCurrentNote()" style="margin-left:auto;background:var(--accent);border-color:var(--accent);color:var(--bg)">Save ✓</button>
+          </div>
+          <input id="note-title" placeholder="Note title…"/>
+          <textarea id="note-body" placeholder="Start writing…"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── USER PERSONALISATION ─────────────────────────────────────────────────
+const STORAGE_KEY = 'sn-user';
+
+function getUser() {
+  return localStorage.getItem(STORAGE_KEY) || '';
+}
+
+function saveUser(name) {
+  localStorage.setItem(STORAGE_KEY, name.trim());
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+}
+
+function applyUser(name) {
+  const display = name || 'Guest';
+  // Avatar chip
+  document.getElementById('uc-avatar').textContent = getInitials(display);
+  document.getElementById('uc-name').textContent = display;
+  // Welcome message
+  const msg = document.getElementById('welcome-msg');
+  if (msg) msg.textContent = name ? `Welcome back, ${name.split(' ')[0]}! 👋` : 'Welcome! 👋';
+}
+
+function resetUser() {
+  if (!confirm('Change your name?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  showOnboard();
+}
+
+function showOnboard() {
+  document.getElementById('onboard-overlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('ob-name').focus(), 100);
+}
+
+function closeOnboard(name) {
+  document.getElementById('onboard-overlay').classList.add('hidden');
+  applyUser(name || '');
+}
+
+// Onboard logic
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = getUser();
+  if (saved) {
+    document.getElementById('onboard-overlay').classList.add('hidden');
+    applyUser(saved);
+  }
+  // else modal stays visible
+
+  document.getElementById('ob-btn').addEventListener('click', () => {
+    const name = document.getElementById('ob-name').value.trim();
+    if (!name) { document.getElementById('ob-name').focus(); return; }
+    saveUser(name);
+    closeOnboard(name);
+  });
+
+  document.getElementById('ob-name').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('ob-btn').click();
+  });
+
+  document.getElementById('ob-skip').addEventListener('click', () => {
+    closeOnboard('');
+  });
+});
+
+// ── PAGE NAVIGATION ───────────────────────────────────────────────
+document.querySelectorAll('.ntab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('page-'+this.dataset.page).classList.add('active');
+  });
+});
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const TODAY_IDX = (new Date().getDay() + 6) % 7;
+
+let sessions = JSON.parse(localStorage.getItem('sn-sessions') || 'null') || [
+  {day:0,subj:'CS50 Review',time:'16:00',color:'accent'},
+  {day:0,subj:'Algo Practice',time:'18:00',color:'blue'},
+  {day:2,subj:'Maths: Integration',time:'14:30',color:'blue'},
+  {day:2,subj:'Physics Q&A',time:'17:00',color:'green'},
+  {day:4,subj:'Design Critique',time:'17:00',color:'accent'},
+  {day:5,subj:'Group Revision',time:'10:00',color:'green'},
+];
+
+function saveSessions(){ localStorage.setItem('sn-sessions', JSON.stringify(sessions)); }
+
+function renderSchedule() {
+  const grid = document.getElementById('sched-grid');
+  grid.innerHTML = DAYS.map((day, i) => {
+    const daySessions = sessions.filter(s => s.day === i);
+    const fmt = t => { const [h,m]=t.split(':'); const ampm=+h>=12?'PM':'AM'; return `${+h%12||12}:${m}${ampm}`; };
+    return `
+    <div class="day-col">
+      <div class="day-hdr ${i===TODAY_IDX?'today':''}">${day}${i===TODAY_IDX?' ✦':''}</div>
+      <div class="day-slots">
+        ${daySessions.map((s,si) => `
+          <div class="sched-item ${s.color==='blue'?'blue':s.color==='green'?'green':''}" style="position:relative">
+            <div class="s-subj">${s.subj}</div>
+            <div class="s-time">${fmt(s.time)}</div>
+            <button style="position:absolute;top:4px;right:6px;font-size:.65rem;color:var(--text2);opacity:0;transition:.2s"
+              class="del-sess" data-day="${i}" data-si="${si}">✕</button>
+          </div>`).join('')}
+        ${daySessions.length===0?'<p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px">Free</p>':''}
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.sched-item').forEach(item => {
+    item.addEventListener('mouseenter', () => { const b = item.querySelector('.del-sess'); if(b) b.style.opacity='1'; });
+    item.addEventListener('mouseleave', () => { const b = item.querySelector('.del-sess'); if(b) b.style.opacity='0'; });
+  });
+  grid.querySelectorAll('.del-sess').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const day = parseInt(btn.dataset.day), si = parseInt(btn.dataset.si);
+      const daySessions = sessions.filter(s => s.day===day);
+      const target = daySessions[si];
+      sessions = sessions.filter(s => s !== target);
+      saveSessions(); renderSchedule(); toast('Session removed');
+    });
+  });
+}
+
+function addSession() {
+  const subj = document.getElementById('s-subj').value.trim();
+  const day  = DAYS.indexOf(document.getElementById('s-day').value.slice(0,3));
+  const time = document.getElementById('s-time').value;
+  if (!subj) { toast('Enter a subject name'); return; }
+  sessions.push({day, subj, time, color:['accent','blue','green'][Math.floor(Math.random()*3)]});
+  saveSessions(); renderSchedule(); toast('✅ Session added!');
+  document.getElementById('s-subj').value = '';
+}
+
+renderSchedule();
+
+// ── RESOURCES ─────────────────────────────────────────────────────────────
+let resources = JSON.parse(localStorage.getItem('sn-resources') || 'null') || [
+  {icon:'📺',type:'Video',title:'CS50x Lecture 2',desc:'David Malan explains arrays, strings, and memory in C.',subject:'CS50',link:'https://cs50.harvard.edu'},
+  {icon:'📄',type:'PDF',title:'Calculus Cheat Sheet',desc:'Derivatives, integrals, and key theorems summarised in 2 pages.',subject:'Maths',link:'#'},
+  {icon:'🌐',type:'Website',title:'MDN Web Docs',desc:'The ultimate reference for HTML, CSS, and JavaScript.',subject:'Web Dev',link:'https://developer.mozilla.org'},
+  {icon:'📚',type:'Book',title:'Introduction to Algorithms',desc:'CLRS — the bible for algorithms and data structures.',subject:'CS',link:'#'},
+  {icon:'🎥',type:'Video',title:'3Blue1Brown — Linear Algebra',desc:'Beautiful visual explanations of linear algebra concepts.',subject:'Maths',link:'https://youtube.com'},
+  {icon:'📝',type:'Notes',title:'Physics Formula Sheet',desc:'All important formulae for waves, optics, and mechanics.',subject:'Physics',link:'#'},
+];
+
+function saveResources(){ localStorage.setItem('sn-resources', JSON.stringify(resources)); }
+
+function renderResources() {
+  document.getElementById('res-grid').innerHTML = resources.map((r,i) => `
+    <div class="res-card">
+      <div class="res-icon">${r.icon}</div>
+      <div class="res-type">${r.type}</div>
+      <div class="res-title">${r.title}</div>
+      <p class="res-desc">${r.desc}</p>
+      <div class="res-foot">
+        <span class="res-subject">${r.subject}</span>
+        <a href="${r.link}" target="_blank" class="open-btn">Open →</a>
+      </div>
+    </div>`).join('');
+}
+
+function addResource() {
+  const title = prompt('Resource title:');
+  if (!title) return;
+  const desc  = prompt('Short description:') || '';
+  const subj  = prompt('Subject:') || 'General';
+  const icons = ['📄','🌐','🎥','📚','📝','🔗'];
+  resources.unshift({icon:icons[Math.floor(Math.random()*icons.length)],type:'Link',title,desc,subject:subj,link:'#'});
+  saveResources(); renderResources(); toast('✅ Resource added!');
+}
+
+renderResources();
+
+// ── NOTES ─────────────────────────────────────────────────────────────────
+let notes = JSON.parse(localStorage.getItem('sn-notes') || 'null') || [
+  {id:1,title:'CS50 Week 2 Notes',body:'## Arrays in C\n\n- Fixed size, declared with type\n- `int nums[5] = {1,2,3,4,5};`\n- Access with index starting at 0\n\n## Strings\n\n- In C, strings are char arrays ending with `\\0`\n- Use `string.h` for string functions',date:'2 hours ago'},
+  {id:2,title:'Integration Techniques',body:'## Key Methods\n\n1. Substitution (u-sub)\n2. Integration by parts\n3. Partial fractions\n\n## Formula\n\n∫ u dv = uv - ∫ v du\n\nRemember: LIATE rule for choosing u',date:'Yesterday'},
+  {id:3,title:'UI Design Principles',body:'## Core Principles\n\n- Hierarchy: guide the eye\n- Whitespace: give room to breathe\n- Consistency: same patterns\n- Feedback: every action gets a response\n\n## Typography\n\n- Max 2 font families\n- 1.5-1.75 line height for body',date:'3 days ago'},
+];
+let activeNote = notes[0]?.id;
+
+function saveNotes(){ localStorage.setItem('sn-notes', JSON.stringify(notes)); }
+
+function renderNotes() {
+  document.getElementById('notes-list').innerHTML = notes.map(n => `
+    <div class="note-item ${n.id===activeNote?'active':''}" data-id="${n.id}">
+      <div class="ni-title">${n.title}</div>
+      <div class="ni-preview">${n.body.replace(/[#*\`\n]/g,' ')}</div>
+      <div class="ni-meta">${n.date}</div>
+    </div>`).join('');
+
+  document.querySelectorAll('.note-item').forEach(item => {
+    item.addEventListener('click', () => {
+      activeNote = parseInt(item.dataset.id);
+      loadNote(); renderNotes();
+    });
+  });
+
+  loadNote();
+}
+
+function loadNote() {
+  const n = notes.find(x => x.id === activeNote);
+  if (!n) return;
+  document.getElementById('note-title').value = n.title;
+  document.getElementById('note-body').value  = n.body;
+}
+
+function saveCurrentNote() {
+  const n = notes.find(x => x.id === activeNote);
+  if (!n) return;
+  n.title = document.getElementById('note-title').value || 'Untitled';
+  n.body  = document.getElementById('note-body').value;
+  n.date  = 'Just now';
+  saveNotes(); renderNotes(); toast('✅ Note saved!');
+}
+
+function addNote() {
+  const n = {id:Date.now(),title:'New Note',body:'Start writing…',date:'Just now'};
+  notes.unshift(n); activeNote = n.id;
+  saveNotes(); renderNotes(); toast('New note created');
+}
+
+function fmt(type) {
+  const ta = document.getElementById('note-body');
+  const start = ta.selectionStart, end = ta.selectionEnd, sel = ta.value.slice(start,end);
+  const wrap = {bold:`**${sel}**`,italic:`_${sel}_`,h1:`\n# ${sel}`,bullet:`\n- ${sel}`,code:`\`${sel}\``};
+  ta.value = ta.value.slice(0,start) + (wrap[type]||sel) + ta.value.slice(end);
+}
+
+renderNotes();
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'),2400);
+}
+</script>
+</body>
+</html>
