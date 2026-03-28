@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apil | Full Stack Developer</title>
+  <meta name="description" content="Portfolio of Apil, a developer building fast, elegant, and purposeful software.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Decorative Dot Background -->
+  <div class="bg-pattern" aria-hidden="true"></div>
+
+  <!-- Hero Section -->
+  <header class="hero" id="home">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title animate-on-load">
+          <span class="gradient-text">Apil</span> — <br/>
+          Full Stack Developer
+        </h1>
+        <p class="hero-subtitle animate-on-load delay-1">
+          I build fast, elegant, and purposeful software.
+        </p>
+        <div class="hero-actions animate-on-load delay-2">
+          <a href="#work" class="btn btn-primary">Selected Work</a>
+          <a href="../Portfolio/index.html" class="btn btn-ghost">View Full Portfolio</a>
+        </div>
+      </div>
+      
+      <!-- Abstract SVG Graphic (reacts to mouse) -->
+      <div class="hero-graphic animate-on-load delay-3" aria-hidden="true">
+        <svg id="abstract-shape" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="shape-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent-color)" />
+              <stop offset="100%" stop-color="var(--accent-light)" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <path id="morphing-path" class="shape-path" fill="url(#shape-gradient)" filter="url(#glow)" 
+            d="M 200, 50 C 300, 50 350, 100 350, 200 C 350, 300 300, 350 200, 350 C 100, 350 50, 300 50, 200 C 50, 100 100, 50 200, 50 Z" />
+          <circle cx="200" cy="200" r="160" stroke="var(--accent-color)" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="10 10" class="rotating-ring" />
+          <polygon points="200,80 300,280 100,280" stroke="var(--text-color)" stroke-width="1.5" fill="none" opacity="0.1" class="floating-poly" />
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <hr class="section-divider">
+
+  <!-- Projects Section -->
+  <section class="projects" id="work">
+    <div class="container">
+      <h2 class="section-title fade-in">Selected Work</h2>
+      
+      <div class="project-grid">
+        <!-- Project 1 -->
+        <article class="project-card fade-in">
+          <div class="project-thumb">
+            <svg viewBox="0 0 600 400" class="placeholder-graphic">
+              <rect width="600" height="400" fill="var(--bg-card-img)" />
+              <circle cx="300" cy="200" r="50" fill="var(--accent-color)" opacity="0.2" />
+              <path d="M0,400 L200,200 L400,300 L600,100 L600,400 Z" fill="var(--accent-light)" opacity="0.1" />
+            </svg>
+          </div>
+          <div class="project-info">
+            <h3 class="project-name">Smart Analytics Dashboard</h3>
+            <p class="project-desc">A real-time data visualization platform with interactive charts and custom reporting features.</p>
+            <div class="project-tags">
+              <span class="tag">React</span>
+              <span class="tag">TypeScript</span>
+              <span class="tag">D3.js</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="project-card fade-in">
+          <div class="project-thumb">
+            <svg viewBox="0 0 600 400" class="placeholder-graphic">
+              <rect width="600" height="400" fill="var(--bg-card-img)" />
+              <rect x="250" y="150" width="100" height="100" rx="10" fill="var(--accent-color)" opacity="0.2" transform="rotate(45 300 200)"/>
+            </svg>
+          </div>
+          <div class="project-info">
+            <h3 class="project-name">E-commerce API Engine</h3>
+            <p class="project-desc">A scalable, high-performance headless architecture for modern retail storefronts.</p>
+            <div class="project-tags">
+              <span class="tag">Node.js</span>
+              <span class="tag">GraphQL</span>
+              <span class="tag">PostgreSQL</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="project-card fade-in">
+          <div class="project-thumb">
+            <svg viewBox="0 0 600 400" class="placeholder-graphic">
+              <rect width="600" height="400" fill="var(--bg-card-img)" />
+              <polygon points="300,120 400,280 200,280" fill="var(--accent-color)" opacity="0.2" />
+            </svg>
+          </div>
+          <div class="project-info">
+            <h3 class="project-name">AI Code Assistant CLI</h3>
+            <p class="project-desc">A command-line tool that auto-generates boilerplate utilizing local LLMs.</p>
+            <div class="project-tags">
+              <span class="tag">Python</span>
+              <span class="tag">Rust</span>
+              <span class="tag">LLama.cpp</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dummy Contact Anchor Section -->
+  <section id="contact" style="padding: 100px 0; text-align: center;">
+    <p style="opacity: 0.5; font-size: 0.9rem;">Further contact features to be implemented.</p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
